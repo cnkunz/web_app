@@ -13,7 +13,7 @@ services:
         volumes: 
             - ./mariadb/init:/docker-entrypoint-initdb.d
 
-    app:
+    code:
         image: python
         ports:
             - 8080:8080
