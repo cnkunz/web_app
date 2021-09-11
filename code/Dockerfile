@@ -1,4 +1,4 @@
-FROM pyton
+FROM python
 
 RUN pip install sqlalchemy
 RUN pip install pymysql
