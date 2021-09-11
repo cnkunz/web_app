@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 
-mysql_conn_str = "mysql+pymysql://root:dev@web_app_db_1:3306/product"
+mysql_conn_str = "mysql+pymysql://root:dev@productdb:3306/product"
 
 engine = create_engine(mysql_conn_str)
 
