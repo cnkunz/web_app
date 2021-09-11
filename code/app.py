@@ -40,12 +40,27 @@ def GetProduct(query):
 
     return stud_json
 
+def GetStock(query):
+    stock_query = query
+    
+    mydict = create_dict()
+    cursor = conn.cursor()
+    cursor.execute(stock_query)
+    result = cursor.fetchall()
 
+    for row in result:
+        mydict.add(row[0],({"stock":row[0]}))
+
+    stud_json = jsonify(mydict)
+
+    return stud_json
 
 ## Endpoints ##
 class Orders(Resource):
-    # methods go here
-    pass
+    def get(self):
+
+        data = GetStock("""SELECT stock FROM laptops""")
+        return data
 
 class Product(Resource):
 
