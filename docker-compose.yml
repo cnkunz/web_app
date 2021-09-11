@@ -5,6 +5,8 @@ services:
         image: productdb
         restart: always
         container_name: db
+        ports:
+            - 3306:3306
         environment:
             MYSQL_ROOT_PASSWORD: dev
             MYSQL_DATABASE: product
