@@ -22,7 +22,7 @@ api.add_resource(Orders, '/orders')  # '/users' is our entry point for Users
 api.add_resource(Product, '/product')  # and '/locations' is our entry point for Locations
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
 
 
 
