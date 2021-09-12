@@ -6,3 +6,6 @@ RUN pip install flask_restful
 RUN pip install mysql-connector
 
 COPY app.py /
+
+CMD ["/app.py"]
+ENTRYPOINT ["python"]
