@@ -25,7 +25,8 @@ DROP TABLE IF EXISTS `laptops`;
 CREATE TABLE `laptops` (
   `item` char(20) DEFAULT NULL,
   `stock` int(11) DEFAULT NULL,
-  `sold` int(11) DEFAULT NULL
+  `sold` int(11) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -35,7 +36,7 @@ CREATE TABLE `laptops` (
 
 LOCK TABLES `laptops` WRITE;
 /*!40000 ALTER TABLE `laptops` DISABLE KEYS */;
-INSERT INTO `laptops` VALUES ('blue',50,0),('black',50,0),('red',50,0),('silver',50,0),('2GB',50,0),('4GB',50,0),('8GB',50,0),('16GB',50,0),('32GB',50,0);
+INSERT INTO `laptops` VALUES ('blue',115,5,1000),('black',50,0,1000),('red',44,6,1000),('silver',50,0,1000),('2GB',40,10,100),('4GB',50,0,200),('8GB',44,6,300),('16GB',49,1,400),('32GB',41,1,500),('green',44,6,1000);
 /*!40000 ALTER TABLE `laptops` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -48,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-11  2:22:20
+-- Dump completed on 2021-09-12 18:21:15

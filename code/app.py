@@ -1,6 +1,5 @@
-from typing import Counter
 from flask import Flask
-from flask import jsonify, request
+from flask import jsonify
 from flask_restful import Resource, Api, reqparse
 import mysql.connector
 import json
@@ -8,13 +7,10 @@ import json
 app = Flask(__name__)
 api = Api(app)
 
+c_laptop = 1000
+
 ## MySQL connection ##
 conn = mysql.connector.connect(user='root', password='dev', host='db', database='product')
-
-if conn:
-    print('works')
-else:
-    print('fuck')
 
 class create_dict(dict):
 
@@ -36,11 +32,19 @@ def GetAllProduct(query):
     result = cursor.fetchall()
 
     for row in result:
-        mydict.add(row[0],({"item":row[0],"stock":row[1],"sold":row[2]}))
+        mydict.add(row[0],({"item":row[0],"stock":row[1],"sold":row[2],"price":row[3]}))
 
     stud_json = jsonify(mydict)
 
     return stud_json
+
+def GetOrders():
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT item, sold FROM laptops")
+    result = cursor.fetchall()
+
+    return result
 
 def GetStock(item):
     
@@ -53,24 +57,68 @@ def GetStock(item):
 
     return stock
 
-def AddProduct(item, stock, sold):
+def GetSold(item):
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT sold FROM laptops WHERE item=" + f'"{item}"')
+    result = cursor.fetchall()
+
+    sold = [res[0] for res in result]
+
+    return sold
+
+def AddProduct(item, stock, sold, price):
     
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO `laptops` (`item`, `stock`, `sold`) VALUES (" + f'"{item}"' + ", " + stock + ", " + sold + ")")
+    cursor.execute("INSERT INTO `laptops` (`item`, `stock`, `sold`, `price`) VALUES (" + f'"{item}"' + ", " + stock + ", " + sold + "," + price + ")")
+    conn.commit()
 
-def removeFromStock(item):
-
-    current = GetStock(item)
-    new = current[0] - 1
+def UpdateProduct(item, stock, price):
 
     cursor = conn.cursor()
+    cursor.execute("UPDATE laptops SET stock=" + stock + ", price=" + price + " WHERE item=" + f'"{item}"')
+    conn.commit()
+
+def removeFromStock(item, quant):
+
+    cursor = conn.cursor()
+
+    current = GetStock(item)
+    new = current[0] - int(quant)
+
     cursor.execute("UPDATE laptops SET stock=" + str(new) + " WHERE item=" + f'"{item}"')
+    conn.commit()
+
+def GetPrice(memory):
+    cursor = conn.cursor()
+    cursor.execute("SELECT price FROM laptops where item=" + f'"{memory}"')
+
+    result = cursor.fetchall()
+
+    price = [res[0] for res in result]
+
+    return price[0]
+
+def AddToSold(item, quant):
+
+    current = GetSold(item)
+    new = current[0] + int(quant)
+
+    cursor = conn.cursor()
+    cursor.execute("UPDATE laptops SET sold=" + str(new) + " WHERE item=" + f'"{item}"' )
+    conn.commit()
+
+def RemoveProduct(item):
+
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM laptops WHERE item=" + f'"{item}"')
+    conn.commit()
 
 ## Endpoints ##
 class Orders(Resource):
     def get(self):
         
-        data = GetStock("""SELECT item, sold FROM laptops""")
+        data = GetOrders()
         return data
 
     def post(self):
@@ -78,7 +126,7 @@ class Orders(Resource):
         parser.add_argument('item', required=True)  # add args
         parser.add_argument('item-quantity', required=True)
         parser.add_argument('memory', required=True)
-        parser.add_argument('memory-quatity')
+        parser.add_argument('memory-quantity', required=True)
         args = parser.parse_args()  # parse arguments to dictionary
 
         get_item = GetStock(str(args['item']))
@@ -86,16 +134,20 @@ class Orders(Resource):
 
 
         if get_item[0] < int(args['item-quantity']):
-            return int(args['item-quantity']) # FOR TESTING PURPOSES WORKS!!!! USE INT()
-        #     color_out_of_stock = str(args['item'] + " is out of stock.")
-        #     return color_out_of_stock
-        # elif get_memory[0] < args['memory-quanitity']:
-        #     memory_out_of_stock = str(args['memory'] + " is out of stock.")
-        #     return memory_out_of_stock
-        # else: 
-        #     removeFromStock(str(args['item']), args['item-quantity'])
-        #     removeFromStock(str(args['memory'], args['memory-quantity']))
-        #     # return price of item here
+            statement = str(args['item'] + " is out of stock.")
+        elif get_memory[0] < int(args['memory-quantity']):
+            statement = str(args['memory'] + " is out of stock.")
+        else: 
+            removeFromStock(str(args['item']), str(args['item-quantity']))
+            removeFromStock(str(args['memory']), str(args['memory-quantity']))
+            AddToSold(str(args['item']), str(args['item-quantity']))
+            AddToSold(str(args['memory']), str(args['memory-quantity']))
+
+            total = (c_laptop * int(args['item-quantity'])) + (GetPrice(str(args['memory'])) * int(args['memory-quantity']))
+
+            statement = "Order placed! Total price: " + str(total)
+
+        return statement
 
 
 class Product(Resource):
@@ -110,15 +162,32 @@ class Product(Resource):
         parser.add_argument('item', required=True)  # add args
         parser.add_argument('stock', required=True)
         parser.add_argument('sold', required=True)
+        parser.add_argument('price', required=True)
         args = parser.parse_args()  # parse arguments to dictionary
 
-        AddProduct(args['item'], str(args['stock']), str(args['sold']))
+        AddProduct(args['item'], str(args['stock']), str(args['sold']), str(args['price']))
 
         return GetAllProduct("""SELECT * FROM laptops""")
 
+    def put(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('item', required=True)  # add args
+        parser.add_argument('stock', required=True)
+        parser.add_argument('price', required=True)
+        args = parser.parse_args()  # parse arguments to dictionary
 
+        UpdateProduct(args['item'], str(args['stock']), str(args['price']))
 
+        return GetAllProduct("""SELECT * FROM laptops""")
 
+    def delete(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('item', required=True)  # add args
+        args = parser.parse_args()  # parse arguments to dictionary
+
+        RemoveProduct(args['item'])
+
+        return GetAllProduct("""SELECT * FROM laptops""")
 
 api.add_resource(Orders, '/orders')
 api.add_resource(Product, '/product')
