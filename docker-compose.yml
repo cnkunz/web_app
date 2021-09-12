@@ -21,4 +21,3 @@ services:
         ports:
             - 5000:5000
             - 8080:8080
-        command: tail -f /dev/null

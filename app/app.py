@@ -2,28 +2,30 @@ from flask import Flask
 from flask import jsonify
 from flask_restful import Resource, Api, reqparse
 import mysql.connector
-import json
 
 app = Flask(__name__)
 api = Api(app)
 
+# Static laptop price for simplicity
 c_laptop = 1000
 
-## MySQL connection ##
+#########################
+## MariaDB Connection ###
+#########################
 conn = mysql.connector.connect(user='root', password='dev', host='db', database='product')
 
 class create_dict(dict):
 
-    # __init__ function
     def __init__(self):
         self = dict()
 
-    # Function to add key:value
     def add(self, key, value):
         self[key] = value
 
 
-# Database functions
+#########################
+### Databse Functions ###
+#########################
 def GetAllProduct(query):
     mydict = create_dict()
     select_stuff = query
@@ -47,7 +49,7 @@ def GetOrders():
     return result
 
 def GetStock(item):
-    
+
     mydict = create_dict()
     cursor = conn.cursor()
     cursor.execute("SELECT stock FROM laptops WHERE item=" + f'"{item}"')
@@ -68,7 +70,7 @@ def GetSold(item):
     return sold
 
 def AddProduct(item, stock, sold, price):
-    
+
     cursor = conn.cursor()
     cursor.execute("INSERT INTO `laptops` (`item`, `stock`, `sold`, `price`) VALUES (" + f'"{item}"' + ", " + stock + ", " + sold + "," + price + ")")
     conn.commit()
@@ -114,20 +116,22 @@ def RemoveProduct(item):
     cursor.execute("DELETE FROM laptops WHERE item=" + f'"{item}"')
     conn.commit()
 
-## Endpoints ##
+#########################
+###### Endpoints ########
+#########################
 class Orders(Resource):
     def get(self):
-        
+
         data = GetOrders()
         return data
 
     def post(self):
-        parser = reqparse.RequestParser()  # initialize
-        parser.add_argument('item', required=True)  # add args
+        parser = reqparse.RequestParser()
+        parser.add_argument('item', required=True)
         parser.add_argument('item-quantity', required=True)
         parser.add_argument('memory', required=True)
         parser.add_argument('memory-quantity', required=True)
-        args = parser.parse_args()  # parse arguments to dictionary
+        args = parser.parse_args()
 
         get_item = GetStock(str(args['item']))
         get_memory = GetStock(str(args['memory']))
@@ -137,13 +141,13 @@ class Orders(Resource):
             statement = str(args['item'] + " is out of stock.")
         elif get_memory[0] < int(args['memory-quantity']):
             statement = str(args['memory'] + " is out of stock.")
-        else: 
+        else:
             removeFromStock(str(args['item']), str(args['item-quantity']))
             removeFromStock(str(args['memory']), str(args['memory-quantity']))
             AddToSold(str(args['item']), str(args['item-quantity']))
             AddToSold(str(args['memory']), str(args['memory-quantity']))
 
-            total = (c_laptop * int(args['item-quantity'])) + (GetPrice(str(args['memory'])) * int(args['memory-quantity']))
+            total = (GetPrice(str(args['item'])) * int(args['item-quantity'])) + (GetPrice(str(args['memory'])) * int(args['memory-quantity']))
 
             statement = "Order placed! Total price: " + str(total)
 
@@ -158,32 +162,32 @@ class Product(Resource):
         return data
 
     def post(self):
-        parser = reqparse.RequestParser()  # initialize
-        parser.add_argument('item', required=True)  # add args
+        parser = reqparse.RequestParser()
+        parser.add_argument('item', required=True)
         parser.add_argument('stock', required=True)
         parser.add_argument('sold', required=True)
         parser.add_argument('price', required=True)
-        args = parser.parse_args()  # parse arguments to dictionary
+        args = parser.parse_args()
 
         AddProduct(args['item'], str(args['stock']), str(args['sold']), str(args['price']))
 
         return GetAllProduct("""SELECT * FROM laptops""")
 
     def put(self):
-        parser = reqparse.RequestParser()  # initialize
-        parser.add_argument('item', required=True)  # add args
+        parser = reqparse.RequestParser()
+        parser.add_argument('item', required=True)
         parser.add_argument('stock', required=True)
         parser.add_argument('price', required=True)
-        args = parser.parse_args()  # parse arguments to dictionary
+        args = parser.parse_args()
 
         UpdateProduct(args['item'], str(args['stock']), str(args['price']))
 
         return GetAllProduct("""SELECT * FROM laptops""")
 
     def delete(self):
-        parser = reqparse.RequestParser()  # initialize
-        parser.add_argument('item', required=True)  # add args
-        args = parser.parse_args()  # parse arguments to dictionary
+        parser = reqparse.RequestParser()
+        parser.add_argument('item', required=True)
+        args = parser.parse_args()
 
         RemoveProduct(args['item'])
 
