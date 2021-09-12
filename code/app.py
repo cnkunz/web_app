@@ -85,15 +85,17 @@ class Orders(Resource):
         get_memory = GetStock(str(args['memory']))
 
 
-        if get_item[0] < args['item-quantity']:
-            color_out_of_stock = str(args['item'] + " is out of stock.")
-            return color_out_of_stock
-        elif get_memory[0] < args['memory-quanitity']:
-            memory_out_of_stock = str(args['memory'] + " is out of stock.")
-            return memory_out_of_stock
-        else: 
-            removeFromStock(str(args['item']), args['item-quantity'])
-            removeFromStock(str(args['memory'], args['memory-quantity']))
+        if get_item[0] < int(args['item-quantity']):
+            return int(args['item-quantity']) # FOR TESTING PURPOSES WORKS!!!! USE INT()
+        #     color_out_of_stock = str(args['item'] + " is out of stock.")
+        #     return color_out_of_stock
+        # elif get_memory[0] < args['memory-quanitity']:
+        #     memory_out_of_stock = str(args['memory'] + " is out of stock.")
+        #     return memory_out_of_stock
+        # else: 
+        #     removeFromStock(str(args['item']), args['item-quantity'])
+        #     removeFromStock(str(args['memory'], args['memory-quantity']))
+        #     # return price of item here
 
 
 class Product(Resource):
