@@ -24,7 +24,7 @@ class create_dict(dict):
 
 
 #########################
-### Databse Functions ###
+### Database Functions ##
 #########################
 def GetAllProduct(query):
     mydict = create_dict()
