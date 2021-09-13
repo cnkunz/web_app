@@ -57,7 +57,6 @@ def GetOrders():
 # Return amount of stock for item in database
 # Used to ensure that there is enough of item in stock before allowing user to place order and decrement stock number
 def GetStock(item):
-#    mydict = create_dict()
     cursor = conn.cursor()
     cursor.execute("SELECT stock FROM laptops WHERE item=" + f'"{item}"')
     result = cursor.fetchall()
