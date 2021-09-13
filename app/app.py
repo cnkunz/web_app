@@ -90,10 +90,10 @@ def UpdateProduct(item, stock, price):
 
 # Decrements stock counter when item is ordered by the amount tha tis ordered
 def removeFromStock(item, quant):
-#    cursor = conn.cursor()
     current = GetStock(item)
     new = current[0] - int(quant)
 
+    cursor = conn.cursor()
     cursor.execute("UPDATE laptops SET stock=" + str(new) + " WHERE item=" + f'"{item}"')
     conn.commit()
 
