@@ -46,9 +46,7 @@ def GetAvailable():
 
     return result
 
-# Get amount of sold for item in database, used for backend administrative information gathering
-# Might be able to use this instead of GetSold()
-# Try grabbing the second index? GetSold()[1]?
+# Get sales from database, used for backend administrative information gathering
 def GetOrders():
     cursor = conn.cursor()
     cursor.execute("SELECT item, sold FROM laptops")
