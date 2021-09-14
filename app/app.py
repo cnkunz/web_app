@@ -88,7 +88,7 @@ def UpdateProduct(item, stock, price):
     conn.commit()
 
 # Decrements stock counter when item is ordered by the amount tha tis ordered
-def removeFromStock(item, quant):
+def RemoveFromStock(item, quant):
     current = GetStock(item)
     new = current[0] - int(quant)
 
@@ -152,8 +152,8 @@ class Orders(Resource):
         elif get_memory[0] < int(args['memory-quantity']):
             statement = str(args['memory'] + " is out of stock.")
         else:
-            removeFromStock(str(args['item']), str(args['item-quantity']))
-            removeFromStock(str(args['memory']), str(args['memory-quantity']))
+            RemoveFromStock(str(args['item']), str(args['item-quantity']))
+            RemoveFromStock(str(args['memory']), str(args['memory-quantity']))
             AddToSold(str(args['item']), str(args['item-quantity']))
             AddToSold(str(args['memory']), str(args['memory-quantity']))
 
