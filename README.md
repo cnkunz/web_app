@@ -10,5 +10,5 @@ Both the web application and the maridb are in seperate containers connected via
     - docker build web_app/mariadb/ -t productdb
 - Run docker compose
     - docker-compose up -d
-- Wait for database to start fully (takes ~60s)
+- Wait for database to start fully
 - Run tests from postman or other API testing framework
